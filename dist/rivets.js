@@ -1040,31 +1040,43 @@
       }
     },
     routine: function(el, collection) {
-      var binding, data, i, index, k, key, model, modelName, options, previous, template, v, view, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3, _ref4, _results;
+      var binding, data, i, index, iter, iter_index, iterated_copy, iterated_mirror, k, key, model, modelName, options, previous, template, v, view, view_model, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4, _results;
       modelName = this.args[0];
       collection = collection || [];
-      if (this.iterated.length > collection.length) {
-        _ref1 = Array(this.iterated.length - collection.length);
+      iterated_mirror = (function() {
+        var _i, _len, _ref1, _results;
+        _ref1 = this.iterated;
+        _results = [];
         for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-          i = _ref1[_i];
-          view = this.iterated.pop();
-          view.unbind();
-          this.marker.parentNode.removeChild(view.els[0]);
+          iter = _ref1[_i];
+          _results.push(iter.models[modelName]);
         }
-      }
-      for (index = _j = 0, _len1 = collection.length; _j < _len1; index = ++_j) {
+        return _results;
+      }).call(this);
+      iterated_copy = iterated_mirror.slice();
+      for (index = _i = 0, _len = collection.length; _i < _len; index = ++_i) {
         model = collection[index];
-        data = {};
-        data[modelName] = model;
-        if (this.iterated[index] == null) {
-          _ref2 = this.view.models;
-          for (key in _ref2) {
-            model = _ref2[key];
+        iter_index = iterated_mirror.indexOf(model);
+        if (~iter_index) {
+          iterated_copy.splice(iterated_copy.indexOf(model), 1);
+          if (iter_index !== index) {
+            previous = index && this.iterated.length ? this.iterated[index - 1].els[0] : this.marker;
+            view = this.iterated.splice(iter_index, 1)[0];
+            this.iterated.splice(index, 0, view);
+            this.marker.parentNode.insertBefore(view.els[0], previous.nextSibling);
+            iterated_mirror.splice(index, 0, iterated_mirror.splice(iter_index, 1)[0]);
+          }
+        } else {
+          data = {};
+          data[modelName] = model;
+          _ref1 = this.view.models;
+          for (key in _ref1) {
+            view_model = _ref1[key];
             if (data[key] == null) {
-              data[key] = model;
+              data[key] = view_model;
             }
           }
-          previous = this.iterated.length ? this.iterated[this.iterated.length - 1].els[0] : this.marker;
+          previous = index && this.iterated.length ? (_ref2 = index - 1, __indexOf.call(this.iterated, _ref2) >= 0) ? this.iterated[index - 1].els[0] : this.iterated[this.iterated.length - 1].els[0] : this.marker;
           options = {
             binders: this.view.options.binders,
             formatters: this.view.options.formatters,
@@ -1080,17 +1092,26 @@
           template = el.cloneNode(true);
           view = new Rivets.View(template, data, options);
           view.bind();
-          this.iterated.push(view);
+          this.iterated.splice(index, 0, view);
           this.marker.parentNode.insertBefore(template, previous.nextSibling);
-        } else if (this.iterated[index].models[modelName] !== model) {
-          this.iterated[index].update(data);
+        }
+      }
+      if (iterated_copy.length) {
+        i = this.iterated.length;
+        while (i--) {
+          view = this.iterated[i];
+          if (view && ~iterated_copy.indexOf(view.models[modelName])) {
+            this.iterated.splice(i, 1);
+            view.unbind();
+            this.marker.parentNode.removeChild(view.els[0]);
+          }
         }
       }
       if (el.nodeName === 'OPTION') {
         _ref4 = this.view.bindings;
         _results = [];
-        for (_k = 0, _len2 = _ref4.length; _k < _len2; _k++) {
-          binding = _ref4[_k];
+        for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
+          binding = _ref4[_j];
           if (binding.el === this.marker.parentNode && binding.type === 'value') {
             _results.push(binding.sync());
           } else {
@@ -1208,6 +1229,7 @@
         callbacks[keypath] = [];
         value = obj[keypath];
         Object.defineProperty(obj, keypath, {
+          enumerable: true,
           get: function() {
             return value;
           },
