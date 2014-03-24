@@ -1040,7 +1040,7 @@
       }
     },
     routine: function(el, collection) {
-      var binding, data, i, index, iter, iter_index, iterated_copy, iterated_mirror, k, key, model, modelName, options, previous, template, v, view, view_model, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4, _results;
+      var binding, data, i, index, iter, iter_index, iterated_copy, iterated_mirror, k, key, model, modelName, options, previous, template, v, view, view_model, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _results;
       modelName = this.args[0];
       collection = collection || [];
       iterated_mirror = (function() {
@@ -1076,16 +1076,16 @@
               data[key] = view_model;
             }
           }
-          previous = index && this.iterated.length ? (_ref2 = index - 1, __indexOf.call(this.iterated, _ref2) >= 0) ? this.iterated[index - 1].els[0] : this.iterated[this.iterated.length - 1].els[0] : this.marker;
+          previous = index && this.iterated.length ? this.iterated[index - 1] ? this.iterated[index - 1].els[0] : this.iterated[this.iterated.length - 1].els[0] : this.marker;
           options = {
             binders: this.view.options.binders,
             formatters: this.view.options.formatters,
             adapters: this.view.options.adapters,
             config: {}
           };
-          _ref3 = this.view.options.config;
-          for (k in _ref3) {
-            v = _ref3[k];
+          _ref2 = this.view.options.config;
+          for (k in _ref2) {
+            v = _ref2[k];
             options.config[k] = v;
           }
           options.config.preloadData = true;
@@ -1108,10 +1108,10 @@
         }
       }
       if (el.nodeName === 'OPTION') {
-        _ref4 = this.view.bindings;
+        _ref3 = this.view.bindings;
         _results = [];
-        for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
-          binding = _ref4[_j];
+        for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+          binding = _ref3[_j];
           if (binding.el === this.marker.parentNode && binding.type === 'value') {
             _results.push(binding.sync());
           } else {
