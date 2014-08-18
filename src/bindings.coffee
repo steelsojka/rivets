@@ -154,12 +154,22 @@ class Rivets.ComponentBinding extends Rivets.Binding
   # Intercepts `Rivets.Binding::bind` to build `@componentView` with a localized
   # map of models from the root view. Bind `@componentView` on subsequent calls.
   bind: =>
+    build = (el, locals) =>
+      (@componentView = new Rivets.View(el, locals, @view.options)).bind()
+      @el.parentNode.replaceChild el, @el
+
     if @componentView?
       @componentView?.bind()
     else
-      el = @component.build.call @attributes @el
-      (@componentView = new Rivets.View(el, @locals(), @view.options)).bind()
-      @el.parentNode.replaceChild el, @el
+  
+      # Allows us to do async stuff in our build function
+      async = () =>
+        @async = true
+        return (el) => build el, locals
+
+      locals = @locals()
+      el = @component.build.call @attributes, @el, locals, async
+      build el, locals if not @async
 
   # Intercept `Rivets.Binding::unbind` to be called on `@componentView`.
   unbind: =>

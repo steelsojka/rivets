@@ -801,13 +801,29 @@
     };
 
     ComponentBinding.prototype.bind = function() {
-      var el, _ref1;
+      var async, build, el, locals, _ref1;
+      build = (function(_this) {
+        return function(el, locals) {
+          (_this.componentView = new Rivets.View(el, locals, _this.view.options)).bind();
+          return _this.el.parentNode.replaceChild(el, _this.el);
+        };
+      })(this);
       if (this.componentView != null) {
         return (_ref1 = this.componentView) != null ? _ref1.bind() : void 0;
       } else {
-        el = this.component.build.call(this.attributes);
-        (this.componentView = new Rivets.View(el, this.locals(), this.view.options)).bind();
-        return this.el.parentNode.replaceChild(el, this.el);
+        async = (function(_this) {
+          return function() {
+            _this.async = true;
+            return function(el) {
+              return build(el, locals);
+            };
+          };
+        })(this);
+        locals = this.locals();
+        el = this.component.build.call(this.attributes, this.el, locals, async);
+        if (!this.async) {
+          return build(el, locals);
+        }
       }
     };
 
