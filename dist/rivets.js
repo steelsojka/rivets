@@ -933,14 +933,15 @@
       }
     },
     subscribe: function(obj, keypath, callback) {
-      var callbacks, value;
+      var callbacks, descriptor, value;
       callbacks = this.weakReference(obj).callbacks;
       if (callbacks[keypath] == null) {
         callbacks[keypath] = [];
         value = obj[keypath];
+        descriptor = Object.getOwnPropertyDescriptor(obj, keypath);
         Object.defineProperty(obj, keypath, {
           enumerable: true,
-          get: function() {
+          get: descriptor.get || function() {
             return value;
           },
           set: (function(_this) {

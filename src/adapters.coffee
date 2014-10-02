@@ -58,9 +58,11 @@ Rivets.adapters['.'] =
       callbacks[keypath] = []
       value = obj[keypath]
 
+      descriptor = Object.getOwnPropertyDescriptor obj, keypath
+
       Object.defineProperty obj, keypath,
         enumerable: true
-        get: -> value
+        get: descriptor.get or -> value
         set: (newValue) =>
           if newValue isnt value
             value = newValue
