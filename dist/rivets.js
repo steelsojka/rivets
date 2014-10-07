@@ -804,12 +804,16 @@
       var async, build, el, locals, _ref1;
       build = (function(_this) {
         return function(el, locals) {
-          (_this.componentView = new Rivets.View(el, locals, _this.view.options)).bind();
+          if (!_this.component.block) {
+            (_this.componentView = new Rivets.View(el, locals, _this.view.options)).bind();
+          }
           return _this.el.parentNode.replaceChild(el, _this.el);
         };
       })(this);
       if (this.componentView != null) {
-        return (_ref1 = this.componentView) != null ? _ref1.bind() : void 0;
+        if (!this.component.block) {
+          return (_ref1 = this.componentView) != null ? _ref1.bind() : void 0;
+        }
       } else {
         async = (function(_this) {
           return function() {
@@ -829,7 +833,9 @@
 
     ComponentBinding.prototype.unbind = function() {
       var _ref1;
-      return (_ref1 = this.componentView) != null ? _ref1.unbind() : void 0;
+      if (!this.component.block) {
+        return (_ref1 = this.componentView) != null ? _ref1.unbind() : void 0;
+      }
     };
 
     return ComponentBinding;
@@ -941,7 +947,7 @@
         descriptor = Object.getOwnPropertyDescriptor(obj, keypath);
         Object.defineProperty(obj, keypath, {
           enumerable: true,
-          get: descriptor.get || function() {
+          get: (descriptor != null ? descriptor.get : void 0) || function() {
             return value;
           },
           set: (function(_this) {
